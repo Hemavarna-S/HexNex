@@ -1,0 +1,40 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
+yarn.lock
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+debug.log
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Build files
+dist/
+out/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor settings
+.idea/
+.vscode/
+*.swp
+
+# Coverage reports
+coverage/
+.nyc_output
+
+# Misc
+tmp/
+temp/

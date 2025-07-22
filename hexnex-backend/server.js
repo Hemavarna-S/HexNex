@@ -4,9 +4,9 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import aiRoute from './routes/aiRoute.js';
-import * as categoriesRoutes from './routes/categoriesRoutes.js';
+import categoriesRoutes from './routes/categoriesRoutes.js'; // ✅ correct import
 
-dotenv.config(); 
+dotenv.config();
 
 const app = express();
 
@@ -14,13 +14,13 @@ const app = express();
 connectDB();
 
 // ✅ Middleware
-app.use(cors()); // Enable CORS for all origins
-app.use(express.json()); // Parse incoming JSON
+app.use(cors());
+app.use(express.json());
 
 // ✅ Routes
-app.use('/api', authRoutes);     // Auth routes: /api/register, /api/login, etc.
-app.use('/ai', aiRoute);         // AI Chatbot route: /ai/hexnexai
-app.use('/api', categoriesRoutes.default || categoriesRoutes); // Categories routes
+app.use('/api', authRoutes);         // Auth routes: /api/register, /api/login, etc.
+app.use('/ai', aiRoute);             // AI Chatbot route: /ai/hexnexai
+app.use('/api', categoriesRoutes);   // Categories routes
 
 // ✅ Health Check Route
 app.get('/', (req, res) => {

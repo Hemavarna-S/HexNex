@@ -1,21 +1,37 @@
 import jwt from 'jsonwebtoken';
 
+// =======================
+// 🔐 Protect: Require valid token
+// =======================
 export const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer '))
-    return res.status(401).json({ message: 'Not authorized' });
+
+  // Check if header starts with Bearer
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Not authorized, no token' });
+  }
 
   try {
     const token = authHeader.split(' ')[1];
+
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // id and role
+
+    // Add user info to request
+    req.user = decoded; // contains id & role
     next();
   } catch (err) {
-    res.status(401).json({ message: 'Token failed' });
+    console.error('JWT error:', err.message);
+    return res.status(401).json({ message: 'Token invalid or expired' });
   }
 };
 
+// =======================
+// 🛡️ isAdmin: Require admin role
+// =======================
 export const isAdmin = (req, res, next) => {
-  if (req.user?.role === 'admin') return next();
-  return res.status(403).json({ message: 'Admin access only' });
+  if (req.user?.role === 'admin') {
+    return next();
+  }
+  return res.status(403).json({ message: 'Access denied: admin only' });
 };

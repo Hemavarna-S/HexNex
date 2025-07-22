@@ -17,9 +17,8 @@ const AIBotChat = () => {
     setMessages((prev) => [...prev, { sender: 'user', text: input }]);
     try {
       const res = await axiosInstance.post('/ai/hexnexai', {
-        question: input,
-        tool,
-      });
+  data: input
+});
       setMessages((prev) => [
         ...prev,
         { sender: 'bot', text: res.data.answer || 'No response received.' },

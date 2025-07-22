@@ -24,6 +24,9 @@ app.use('/ai', aiRoute);         // AI Chatbot route: /ai/hexnexai
 app.get('/', (req, res) => {
   res.send('🛡️ HexNex Backend is running!');
 });
+const categoriesRoutes = require('./routes/categoriesRoutes');
+app.use('/api', categoriesRoutes);
+
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;

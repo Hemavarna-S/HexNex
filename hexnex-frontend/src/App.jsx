@@ -15,6 +15,13 @@ import BruteForceRoom from './pages/rooms/BruteForceRoom';
 import SocialEngineeringRoom from './pages/rooms/SocialEngineeringRoom';
 import MalwareRoom from './pages/rooms/MalwareRoom';
 
+// Fake vault pages (where creds are hidden)
+import VaultLoginPage from './pages/VaultLoginPage';
+import PortalPage from './pages/PortalPage';
+import HiddenAdminPage from './pages/HiddenAdminPage';
+import SSHInfoPage from './pages/SSHInfoPage';
+import EncryptedFilePage from './pages/EncryptedFilePage';
+
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('token');
 
@@ -25,19 +32,15 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected route: Student Dashboard */}
+        {/* Protected routes */}
         <Route
           path="/student-dashboard"
           element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" />}
         />
-
-        {/* Protected route: Main Simulation Room Selector */}
         <Route
           path="/rooms"
           element={isAuthenticated ? <Rooms /> : <Navigate to="/login" />}
         />
-
-        {/* Protected routes: Individual simulation labs */}
         <Route
           path="/rooms/phishing"
           element={isAuthenticated ? <PhishingRoom /> : <Navigate to="/login" />}
@@ -58,12 +61,23 @@ const App = () => {
           path="/rooms/malware"
           element={isAuthenticated ? <MalwareRoom /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/progress"
+          element={isAuthenticated ? <div>Progress page</div> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/hexnexai"
+          element={isAuthenticated ? <AIBotChat /> : <Navigate to="/login" />}
+        />
 
-        {/* Protected routes: Additional pages */}
-        <Route path="/progress" element={isAuthenticated ? <div /> : <Navigate to="/login" />} />
-        <Route path="/hexnexai" element={isAuthenticated ? <AIBotChat /> : <Navigate to="/login" />} />
+        {/* Fake vault pages */}
+        <Route path="/vault-login" element={<VaultLoginPage />} />
+        <Route path="/portal" element={<PortalPage />} />
+        <Route path="/ssh-info" element={<SSHInfoPage />} />
+        <Route path="/hidden-admin" element={<HiddenAdminPage />} />
+        <Route path="/encrypted-file" element={<EncryptedFilePage />} />
 
-        {/* Redirect all unknown paths to login */}
+        {/* Catch all */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

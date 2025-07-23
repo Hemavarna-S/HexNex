@@ -1,141 +1,237 @@
 import React, { useState } from 'react';
-import { Box, Paper, Typography, Button, Modal, TextField, Snackbar, Divider, List, ListItem, ListItemText } from '@mui/material';
+import { Layout, Steps, Card, Input, Button, Typography, message, Spin } from 'antd';
+import { KeyOutlined, LockOutlined, ApiOutlined, EyeInvisibleOutlined, FileZipOutlined, FlagOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
-const PhishingRoom = () => {
-  const [visible, setVisible] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [formValues, setFormValues] = useState({ username: '', password: '' });
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
+const { Header, Content } = Layout;
+const { Paragraph, Title, Text } = Typography;
 
-  const handleOpenPhishPage = () => setVisible(true);
+const BruteForceRoom = () => {
+  const [step, setStep] = useState(0);
+  const [inputs, setInputs] = useState({
+    username: '',
+    portalPass: '',
+    sshPass: '',
+    hiddenPass: '',
+    finalPass: '',
+    flag: ''
+  });
+  const [attempts, setAttempts] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [flagVisible, setFlagVisible] = useState(false);
+
+  const nextStep = () => { setStep(prev => prev + 1); setAttempts(0); };
+
+  const handleInputChange = (field, value) => {
+    setInputs({ ...inputs, [field]: value });
+  };
+
+  const simulateBruteForce = async (callback) => {
+    setLoading(true);
+    let fakeAttempts = Math.floor(Math.random() * 4) + 2;
+    for (let i = 1; i <= fakeAttempts; i++) {
+      setAttempts(prev => prev + 1);
+      await new Promise(res => setTimeout(res, 200));
+    }
+    setLoading(false);
+    callback();
+  };
 
   const handleSubmit = () => {
-    if (!formValues.username || !formValues.password) {
-      setSnackbar({ open: true, message: 'Please enter both username and password.', severity: 'error' });
-      return;
+    simulateBruteForce(() => {
+      switch (step) {
+        case 0:
+          if (inputs.username === 'vault_keeper') {
+            message.success('✅ Username accepted!');
+            nextStep();
+          } else {
+            message.error('❌ Invalid username! Hint: check vault login clue in source.');
+          }
+          break;
+        case 1:
+          if (inputs.portalPass === 'password') {
+            message.success('🔓 Portal cracked!');
+            nextStep();
+          } else {
+            message.error('Wrong password! Hint: check portal clue in source.');
+          }
+          break;
+        case 2:
+          if (inputs.sshPass === 'vault123') {
+            message.success('🛡️ SSH access granted!');
+            nextStep();
+          } else {
+            message.error('Wrong SSH password! Check ssh clue in source.');
+          }
+          break;
+        case 3:
+          if (inputs.hiddenPass === 'h1dden') {
+            message.success('👁️ Hidden login bypassed!');
+            nextStep();
+          } else {
+            message.error('Wrong! Check hidden login clue in source.');
+          }
+          break;
+        case 4:
+          if (inputs.finalPass === 'finalpayload') {
+            message.success('📦 Encrypted journal unlocked!');
+            setFlagVisible(true);
+          } else {
+            message.error('Wrong password! Check encrypted journal clue in source.');
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  };
+
+  const handleFlagSubmit = () => {
+    if (inputs.flag === 'HEXNEX{Brut3_F0rc3_Atta)k}') {
+      message.success('🏁 Flag correct! You completed the room!');
+    } else {
+      message.error('❌ Incorrect flag. Try again!');
     }
-    setCredentials(formValues);
-    setSubmitted(true);
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', background: '#0b1e36' }}>
-      {/* Sidebar */}
-      <Box sx={{ width: 220, bgcolor: '#112d4e', color: '#dbe2ef', p: 2 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', textAlign: 'center' }}>📥 Mailbox</Typography>
-        <Divider sx={{ borderColor: '#dbe2ef33', mb: 1 }} />
-        <List>
-          <ListItem button selected>
-            <ListItemText primary="Inbox" />
-          </ListItem>
-          <ListItem button>
-            <ListItemText primary="Sent" />
-          </ListItem>
-          <ListItem button>
-            <ListItemText primary="Spam" />
-          </ListItem>
-          <ListItem button>
-            <ListItemText primary="Trash" />
-          </ListItem>
-        </List>
-      </Box>
+    <Layout style={{ minHeight: '100vh', background: 'linear-gradient(to right, #0d1b2a, #1b263b)' }}>
+      <Header style={{ color: '#40a9ff', fontSize: '20px' }}>
+        <ThunderboltOutlined /> The Vault of Forgotten Credentials
+      </Header>
+      <Content style={{ padding: '24px' }}>
+        <Card style={{ background: '#112d4e', borderRadius: '12px', position: 'relative' }}>
+          {/* Clues hidden in HTML comments (visible in view page source) */}
+          <div style={{ display: 'none' }}>
+            {/* vault login username: vault_keeper */}
+            {/* portal password: password */}
+            {/* ssh password: vault123 */}
+            {/* hidden login password: h1dden */}
+            {/* final encrypted journal password: finalpayload */}
+            {/* flag: HEXNEX{Brut3_F0rc3_Atta)k} */}
+          </div>
 
-      {/* Main email content */}
-      <Box sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
-        <Paper elevation={4} sx={{ maxWidth: 700, mx: 'auto', p: 3, background: '#112d4e', color: '#fff' }}>
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
-            📧 Amazon Rewards Team
-          </Typography>
-          <Typography sx={{ color: '#dbe2ef', mb: 1 }}>
-            <strong>Subject:</strong> Congratulations! You won a million dollar Amazon gift card.
-          </Typography>
-          <Divider sx={{ borderColor: '#dbe2ef33', my: 1 }} />
-          <Typography sx={{ color: '#dbe2ef', mb: 2, lineHeight: 1.7 }}>
-            Dear user,<br />
-            We are excited to inform you that you have won an Amazon gift card worth $1,000,000!<br />
-            To claim your reward, please click the link below and sign in.
-          </Typography>
-          <Button
-            variant="text"
-            sx={{ color: '#26ff00ff', fontWeight: 'bold', textDecoration: 'underline', fontSize: '1.05rem' }}
-            onClick={handleOpenPhishPage}
-          >
-            👉 Click here to claim
-          </Button>
-        </Paper>
-      </Box>
+          <Steps current={step} size="small" style={{ marginBottom: '24px' }}>
+            <Steps.Step title="Username Roulette" icon={<KeyOutlined />} />
+            <Steps.Step title="Cracked Portal" icon={<LockOutlined />} />
+            <Steps.Step title="SSH Brute" icon={<ApiOutlined />} />
+            <Steps.Step title="Hidden Login" icon={<EyeInvisibleOutlined />} />
+            <Steps.Step title="Encrypted Journal" icon={<FileZipOutlined />} />
+          </Steps>
 
-      {/* Modal */}
-      <Modal open={visible} onClose={() => setVisible(false)}>
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0, 4, 255, 0.25)',
-          p: 4,
-          minWidth: 340,
-          maxWidth: 420,
-          border: '2px solid #00ff33ff',
-          color: '#fff',
-          background: 'linear-gradient(135deg, #1a2238 60%, #141236ff 100%)',
-        }}>
-          {!submitted ? (
+          {loading && <Spin tip="Brute forcing..." style={{ marginBottom: '20px' }} />}
+
+          {step === 0 && !loading && (
             <>
-              <Typography variant="h6" sx={{ mb: 2, color: '#f7f7f7ff', fontWeight: 'bold', textAlign: 'center', letterSpacing: 1, textShadow: '0 2px 8px #1a2238' }}>
-                Amazon Sign In (Lab Simulation)
-              </Typography>
-              <TextField
-                fullWidth
-                label="Username / Email"
-                value={formValues.username}
-                onChange={e => setFormValues({ ...formValues, username: e.target.value })}
-                sx={{ mb: 2, input: { color: '#fff' }, label: { color: '#ffffffff' } }}
-                InputLabelProps={{ style: { color: '#ffffffff' } }}
+              <Title level={4} style={{ color: '#dbe2ef' }}>🎲 Username Roulette</Title>
+              <Paragraph style={{ color: '#dbe2ef' }}>
+                Find the correct vault username hidden in this page source.
+              </Paragraph>
+              <Input
+                placeholder="e.g., vault_keeper"
+                value={inputs.username}
+                onChange={e => handleInputChange('username', e.target.value)}
+                style={{ marginBottom: '10px' }}
               />
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                value={formValues.password}
-                onChange={e => setFormValues({ ...formValues, password: e.target.value })}
-                sx={{ mb: 2, input: { color: '#fff' }, label: { color: '#ffffffff' } }}
-                InputLabelProps={{ style: { color: '#ffffffff' } }}
-              />
-              <Button variant="contained" fullWidth onClick={handleSubmit} sx={{ background: 'linear-gradient(90deg, #00ff00ff, #1f9412ff)', color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 2px 8px #001aff99' }}>
-                Login
-              </Button>
-            </>
-          ) : (
-            <>
-              <Typography sx={{ mb: 1, color: '#00ff08ff', fontWeight: 'bold', textAlign: 'center', letterSpacing: 1, textShadow: '0 2px 8px #1a2238' }}>
-                <strong>You entered:</strong>
-              </Typography>
-              <Typography sx={{ color: '#fff', fontFamily: 'monospace', mb: 1 }}>Username: {credentials.username}</Typography>
-              <Typography sx={{ color: '#fff', fontFamily: 'monospace', mb: 2 }}>Password: {credentials.password}</Typography>
-              <Typography color="error" sx={{ mt: 2, mb: 2, fontWeight: 'bold', textAlign: 'center', fontSize: '1.1rem', background: 'rgba(255,69,58,0.12)', borderRadius: 2, p: 1 }}>
-                ⚠️ This is a phishing simulation! Never enter your credentials on untrusted sites.
-              </Typography>
-              <Button variant="outlined" onClick={() => setVisible(false)} sx={{ borderColor: '#00ff26ff', color: '#00ff66ff', fontWeight: 'bold' }}>
-                Close
-              </Button>
+              <Button type="primary" onClick={handleSubmit}>Try</Button>
+              <Text style={{ color: '#dbe2ef' }}>Attempts: {attempts}</Text>
             </>
           )}
-        </Box>
-      </Modal>
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={snackbar.message}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      />
-    </Box>
+          {step === 1 && !loading && (
+            <>
+              <Title level={4} style={{ color: '#dbe2ef' }}>🔐 Crack the Portal</Title>
+              <Paragraph style={{ color: '#dbe2ef' }}>
+                Password clue hidden in this page source.
+              </Paragraph>
+              <Input.Password
+                placeholder="Enter portal password"
+                value={inputs.portalPass}
+                onChange={e => handleInputChange('portalPass', e.target.value)}
+                style={{ marginBottom: '10px' }}
+              />
+              <Button type="primary" onClick={handleSubmit}>Crack</Button>
+              <Text style={{ color: '#dbe2ef' }}>Attempts: {attempts}</Text>
+            </>
+          )}
+
+          {step === 2 && !loading && (
+            <>
+              <Title level={4} style={{ color: '#dbe2ef' }}>🛡️ SSH Brute-force</Title>
+              <Paragraph style={{ color: '#dbe2ef' }}>
+                Weak SSH password clue hidden in this page source.
+              </Paragraph>
+              <Input.Password
+                placeholder="Enter SSH password"
+                value={inputs.sshPass}
+                onChange={e => handleInputChange('sshPass', e.target.value)}
+                style={{ marginBottom: '10px' }}
+              />
+              <Button type="primary" onClick={handleSubmit}>Brute Force</Button>
+              <Text style={{ color: '#dbe2ef' }}>Attempts: {attempts}</Text>
+            </>
+          )}
+
+          {step === 3 && !loading && (
+            <>
+              <Title level={4} style={{ color: '#dbe2ef' }}>👁️ Hidden Login</Title>
+              <Paragraph style={{ color: '#dbe2ef' }}>
+                Hidden login password clue in this page source.
+              </Paragraph>
+              <Input.Password
+                placeholder="Enter hidden login password"
+                value={inputs.hiddenPass}
+                onChange={e => handleInputChange('hiddenPass', e.target.value)}
+                style={{ marginBottom: '10px' }}
+              />
+              <Button type="primary" onClick={handleSubmit}>Submit</Button>
+              <Text style={{ color: '#dbe2ef' }}>Attempts: {attempts}</Text>
+            </>
+          )}
+
+          {step === 4 && !flagVisible && !loading && (
+            <>
+              <Title level={4} style={{ color: '#dbe2ef' }}>📦 Encrypted Journal</Title>
+              <Paragraph style={{ color: '#dbe2ef' }}>
+                Final password clue hidden in this page source.
+              </Paragraph>
+              <Input.Password
+                placeholder="Enter final password"
+                value={inputs.finalPass}
+                onChange={e => handleInputChange('finalPass', e.target.value)}
+                style={{ marginBottom: '10px' }}
+              />
+              <Button type="primary" onClick={handleSubmit}>Decrypt</Button>
+              <Text style={{ color: '#dbe2ef' }}>Attempts: {attempts}</Text>
+            </>
+          )}
+
+          {flagVisible && (
+            <>
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <FlagOutlined style={{ fontSize: '40px', color: '#40a9ff' }} />
+                <Paragraph style={{ color: '#dbe2ef', marginTop: '10px' }}>
+                  🎉 Congratulations! You found the final payload:
+                </Paragraph>
+                <Paragraph copyable code style={{ color: '#fff', fontSize: '18px' }}>
+                  HEXNEX{'{Brut3_F0rc3_Atta)k}'}
+                </Paragraph>
+              </div>
+              <div style={{ marginTop: '20px' }}>
+                <Title level={4} style={{ color: '#dbe2ef' }}>🏁 Submit your flag</Title>
+                <Input
+                  placeholder="HEXNEX{...}"
+                  value={inputs.flag}
+                  onChange={e => handleInputChange('flag', e.target.value)}
+                  style={{ marginBottom: '10px' }}
+                />
+                <Button type="primary" onClick={handleFlagSubmit}>Submit Flag</Button>
+              </div>
+            </>
+          )}
+        </Card>
+      </Content>
+    </Layout>
   );
 };
 
-export default PhishingRoom;
+export default BruteForceRoom;

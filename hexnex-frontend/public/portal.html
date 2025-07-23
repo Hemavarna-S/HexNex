@@ -2,9 +2,62 @@
 <html>
 <head>
   <title>Portal</title>
+  <style>
+    body {
+      background-color: #0c0c0c;
+      color: #00ffee;
+      font-family: "Lucida Console", monospace;
+      padding: 20px;
+    }
+    .glow {
+      text-shadow: 0 0 5px #00ffee, 0 0 10px #00ffee;
+    }
+    .console-box {
+      background-color: #111;
+      padding: 15px;
+      border: 1px solid #00ffee;
+      box-shadow: 0 0 10px #00ffee;
+      margin-top: 20px;
+    }
+    .status {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .overlay {
+      color: red;
+      font-style: italic;
+      margin-top: 10px;
+    }
+    .scan-code {
+      font-size: 12px;
+      color: yellow;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h3>Portal page</h3>
+  <h3 class="glow">🌀 Welcome to the Portal Interface</h3>
+
+  <div class="overlay">Protocol mismatch detected. Recalibrating interface shell…</div>
+
+  <div class="console-box">
+    <div class="status">
+      [INIT] Portal services booted<br>
+      [CHK] Quantum handshake: INCONCLUSIVE<br>
+      [SYS] Access node latency: 731 ms<br>
+      [FAIL] Biometric ping: No response<br>
+      [INFO] Ghost packet received from node ::204a:137b<br>
+      [WARN] Portal entropy levels exceed threshold<br>
+      [PROG] Configuration signature mismatch... requesting override<br>
+    </div>
+  </div>
+
+  <div class="scan-code">
+    Scan ID: PRTL-X9D71F<br>
+    Mode: Passive Echo<br>
+    Gatekeeper: dormant<br>
+  </div>
+
   <!-- portal password: password -->
 </body>
 </html>

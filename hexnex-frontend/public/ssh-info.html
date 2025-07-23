@@ -2,9 +2,56 @@
 <html>
 <head>
   <title>SSH Info</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: monospace;
+      padding: 20px;
+    }
+    .terminal {
+      background-color: #111;
+      border: 2px solid #0f0;
+      padding: 15px;
+      margin-top: 20px;
+      box-shadow: 0 0 10px #0f0;
+    }
+    .terminal-text {
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
+    }
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
+  </style>
 </head>
 <body>
-  <h3>SSH info page</h3>
+  <h3 class="blink">Initializing SSH Diagnostic Console...</h3>
+
+  <div class="terminal">
+    <div class="terminal-text">
+      $ ssh -i user@vault.local<br>
+      [!] Port 22 - Redirect loop detected<br>
+      [*] Retrying via alternative protocol: vault-link<br>
+      <br>
+      ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒<br>
+      → System Version: v1.04-alpha (Legacy)<br>
+      → Security Mode: Transient Hardened (unstable)<br>
+      → Tracker Module: Unavailable<br>
+      → Authentication Flags: ✖ RSA | ✖ OTP | ✔ Password<br>
+      → Vault Status: Fragmented | Access restricted<br>
+      <br>
+      ### CONFIG OVERRIDES DETECTED<br>
+      ⚠ WARNING: TLS fallback active<br>
+      ⚠ WARNING: Shell injection attempt logged<br>
+      <br>
+      > Awaiting authorized access... █
+    </div>
+  </div>
+
   <!-- ssh password: vault123 -->
 </body>
 </html>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Layout, Steps, Card, Input, Button, Typography, message, Spin } from 'antd';
-import { KeyOutlined, LockOutlined, ApiOutlined, EyeInvisibleOutlined, FileZipOutlined, FlagOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { KeyOutlined, LockOutlined, ApiOutlined, EyeInvisibleOutlined, FileZipOutlined, ThunderboltOutlined, FlagOutlined } from '@ant-design/icons';
+import Confetti from 'react-confetti';
 
 const { Header, Content } = Layout;
 const { Paragraph, Title, Text } = Typography;
@@ -18,6 +19,7 @@ const BruteForceRoom = () => {
   const [attempts, setAttempts] = useState(0);
   const [loading, setLoading] = useState(false);
   const [flagVisible, setFlagVisible] = useState(false);
+  const [roomCompleted, setRoomCompleted] = useState(false); // ✅ new
 
   const nextStep = () => { setStep(prev => prev + 1); setAttempts(0); };
 
@@ -88,6 +90,7 @@ const BruteForceRoom = () => {
   const handleFlagSubmit = () => {
     if (inputs.flag === 'HEXNEX{Brut3_F0rc3_Atta)k}') {
       message.success('🏁 Correct! You completed the room!');
+      setRoomCompleted(true); // ✅ trigger completion
     } else {
       message.error('❌ Incorrect flag.');
     }
@@ -113,9 +116,6 @@ const BruteForceRoom = () => {
           {!loading && step === 0 && (
             <>
               <Title level={4} style={{ color: '#dbe2ef' }}>🎲 Username Roulette</Title>
-              <Paragraph style={{ color: '#dbe2ef' }}>
-                Find the correct username hidden in the vault login page.
-              </Paragraph>
               <Input
                 placeholder="vault_keeper"
                 value={inputs.username}
@@ -188,7 +188,7 @@ const BruteForceRoom = () => {
             </>
           )}
 
-          {flagVisible && (
+          {flagVisible && !roomCompleted && (
             <>
               <Paragraph style={{ color: '#dbe2ef', marginTop: '10px' }}>
                 🎉 You found the final payload:
@@ -204,6 +204,18 @@ const BruteForceRoom = () => {
                 style={{ marginBottom: '10px' }}
               />
               <Button type="primary" onClick={handleFlagSubmit}>Submit Flag</Button>
+            </>
+          )}
+
+          {roomCompleted && (
+            <>
+              <Confetti /> {/* 🎉 Party effect */}
+              <Title level={3} style={{ color: '#40a9ff', marginTop: '20px' }}>
+                🎉 Congratulations! You have completed the <i>Vault of Forgotten Credentials</i> room!
+              </Title>
+              <Button type="primary" style={{ marginTop: '20px' }} onClick={() => window.location.href = '/rooms'}>
+                Done
+              </Button>
             </>
           )}
         </Card>

@@ -100,15 +100,13 @@ const BruteForceRoom = () => {
       </Header>
       <Content style={{ padding: '24px' }}>
         <Card style={{ background: '#112d4e', borderRadius: '12px', position: 'relative' }}>
-          {/* Clues hidden in HTML comments (visible in view page source) */}
-          <div style={{ display: 'none' }}>
-            {/* vault login username: vault_keeper */}
-            {/* portal password: password */}
-            {/* ssh password: vault123 */}
-            {/* hidden login password: h1dden */}
-            {/* final encrypted journal password: finalpayload */}
-            {/* flag: HEXNEX{Brut3_F0rc3_Atta)k} */}
-          </div>
+          {/* 👀 HIDDEN CLUES - VIEW PAGE SOURCE TO SEE ANSWERS */}
+          {/* ✅ vault login username: vault_keeper */}
+          {/* 🔐 portal password: password */}
+          {/* 🛡️ ssh password: vault123 */}
+          {/* 👁️ hidden login password: h1dden */}
+          {/* 📦 final encrypted journal password: finalpayload */}
+          {/* 🏁 final flag: HEXNEX{Brut3_F0rc3_Atta)k} */}
 
           <Steps current={step} size="small" style={{ marginBottom: '24px' }}>
             <Steps.Step title="Username Roulette" icon={<KeyOutlined />} />

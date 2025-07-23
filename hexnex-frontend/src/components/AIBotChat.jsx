@@ -8,26 +8,21 @@ import {
   Chip
 } from '@mui/material';
 import axiosInstance from '../utils/api';
-
 const AIBotChat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [tool, setTool] = useState('General');
-
   const sendMessage = async () => {
     if (!input.trim()) return;
-
-    // Add user's message to chat
     setMessages((prev) => [...prev, { sender: 'user', text: input }]);
-
     try {
       const res = await axiosInstance.post('/ai/hexnexai', {
-        data: input
+        question: input,
+        tool,
       });
-
       setMessages((prev) => [
         ...prev,
-        { sender: 'bot', text: res.data.message || 'No response received.' },
+        { sender: 'bot', text: res.data.answer || 'No response received.' },
       ]);
     } catch (error) {
       setMessages((prev) => [
@@ -35,16 +30,13 @@ const AIBotChat = () => {
         { sender: 'bot', text: 'Error: Unable to reach server.' },
       ]);
     }
-
     setInput('');
   };
-
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
         🧠 Cybersecurity AI Chatbot
       </Typography>
-
       <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
         {['General', 'YARA', 'Scapy', 'OpenCTI', 'Metasploit'].map((t) => (
           <Chip
@@ -56,7 +48,6 @@ const AIBotChat = () => {
           />
         ))}
       </Box>
-
       <Paper elevation={3} sx={{ p: 2, height: 300, overflowY: 'auto', mb: 2 }}>
         {messages.map((msg, idx) => (
           <Typography
@@ -66,11 +57,11 @@ const AIBotChat = () => {
               mb: 1,
             }}
           >
-            <strong>{msg.sender === 'user' ? 'You' : 'CyberBot'}:</strong> {msg.text}
+            <strong>{msg.sender === 'user' ? 'You' : 'CyberBot'}:</strong>{' '}
+            {msg.text}
           </Typography>
         ))}
       </Paper>
-
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
@@ -86,5 +77,4 @@ const AIBotChat = () => {
     </Box>
   );
 };
-
 export default AIBotChat;

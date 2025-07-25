@@ -1,80 +1,82 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  Chip
-} from '@mui/material';
-import axiosInstance from '../utils/api';
+import React, { useState } from "react";
+import { Button, Input, Typography, Card, Space, Tag, message as antMessage, Comment, Avatar, List } from "antd";
+import { askGroq } from "../utils/groq";
+
+const { Title } = Typography;
+const tools = ["General", "YARA", "Scapy", "OpenCTI", "Metasploit"];
+
+const botAvatar = "https://api.dicebear.com/7.x/bottts/svg";    // or any image url
+const userAvatar = "https://api.dicebear.com/7.x/pixel-art/svg";
+
 const AIBotChat = () => {
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [tool, setTool] = useState('General');
+  const [input, setInput] = useState("");
+  const [tool, setTool] = useState("General");
+  const [loading, setLoading] = useState(false);
+
   const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages((prev) => [...prev, { sender: 'user', text: input }]);
+    const newUserMessage = { sender: "user", text: input };
+    setMessages(prev => [...prev, newUserMessage]);
+    setInput("");
+    setLoading(true);
     try {
-      const res = await axiosInstance.post('/ai/hexnexai', {
-        question: input,
-        tool,
-      });
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: res.data.answer || 'No response received.' },
-      ]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: 'Error: Unable to reach server.' },
-      ]);
+      const reply = await askGroq(input, tool);
+      setMessages(prev => [...prev, newUserMessage, { sender: "bot", text: reply }]);
+    } catch (err) {
+      console.error(err);
+      antMessage.error("Unable to reach Groq API.");
+      setMessages(prev => [...prev, { sender: "bot", text: "Error: Unable to reach Groq API." }]);
     }
-    setInput('');
+    setLoading(false);
   };
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom>
-        🧠 Cybersecurity AI Chatbot
-      </Typography>
-      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-        {['General', 'YARA', 'Scapy', 'OpenCTI', 'Metasploit'].map((t) => (
-          <Chip
+    <Space direction="vertical" style={{ width: "100%", padding: 24 }}>
+      <Title level={3}>🧠 Cybersecurity AI Chatbot</Title>
+      <Space wrap>
+        {tools.map(t => (
+          <Tag
             key={t}
-            label={t}
-            color={tool === t ? 'primary' : 'default'}
+            color={tool === t ? "blue" : "default"}
+            style={{ cursor: "pointer" }}
             onClick={() => setTool(t)}
-            sx={{ cursor: 'pointer' }}
-          />
-        ))}
-      </Box>
-      <Paper elevation={3} sx={{ p: 2, height: 300, overflowY: 'auto', mb: 2 }}>
-        {messages.map((msg, idx) => (
-          <Typography
-            key={idx}
-            sx={{
-              color: msg.sender === 'user' ? '#1565c0' : '#2e7d32',
-              mb: 1,
-            }}
           >
-            <strong>{msg.sender === 'user' ? 'You' : 'CyberBot'}:</strong>{' '}
-            {msg.text}
-          </Typography>
+            {t}
+          </Tag>
         ))}
-      </Paper>
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <TextField
-          fullWidth
-          label="Ask about cybersecurity..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+      </Space>
+
+      <Card style={{ height: 400, overflowY: "auto" }}>
+        <List
+          dataSource={messages}
+          renderItem={(msg, idx) => (
+            <Comment
+              key={idx}
+              author={msg.sender === "user" ? "You" : "CyberBot"}
+              avatar={<Avatar src={msg.sender === "user" ? userAvatar : botAvatar} />}
+              content={msg.text}
+              style={{ marginBottom: 8 }}
+            />
+          )}
         />
-        <Button variant="contained" onClick={sendMessage}>
+      </Card>
+
+      <Space>
+        <Input
+          placeholder={`Ask about ${tool}...`}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onPressEnter={sendMessage}
+          disabled={loading}
+          style={{ width: 400 }}
+        />
+        <Button type="primary" onClick={sendMessage} loading={loading}>
           Send
         </Button>
-      </Box>
-    </Box>
+      </Space>
+    </Space>
   );
 };
+
 export default AIBotChat;

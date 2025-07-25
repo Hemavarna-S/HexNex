@@ -17,6 +17,7 @@
     "antd": "^5.26.6",
     "axios": "^1.9.0",
     "framer-motion": "^12.15.0",
+    "openai": "^5.10.2",
     "react": "^19.1.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",

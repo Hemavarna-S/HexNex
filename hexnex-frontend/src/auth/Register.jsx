@@ -20,7 +20,7 @@ const Register = () => {
 
     try {
       console.log('Register payload:', { name, email, password, role }); 
-      const response = await axios.post('https://hexnex.onrender.com/api/register', { name, email, password, role });
+      const response = await axios.post('https://hexnex-1.onrender.com/api/register', { name, email, password, role });
 
       if (response.status === 201 || response.data.success) { 
         alert('✅ Registration successful! Redirecting to login...');

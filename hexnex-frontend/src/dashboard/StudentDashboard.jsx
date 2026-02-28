@@ -24,6 +24,8 @@ const StudentDashboard = () => {
             sx={{ mt: 2 }}
             onClick={() => {
               localStorage.clear();
+              // notify app about auth change so protected routes update
+              window.dispatchEvent(new Event('authChanged'));
               navigate('/');
             }}
           >

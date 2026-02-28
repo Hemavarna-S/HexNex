@@ -6,7 +6,7 @@ import Register from './auth/Register';
 import StudentDashboard from './dashboard/StudentDashboard';
 import LandingPage from './pages/LandingPage';
 import Rooms from './pages/Rooms';
-// import AIBotChat from './components/AIBotChat';
+import AIBotChat from './components/AIBotChat';
 
 // Individual simulation rooms
 import PhishingRoom from './pages/rooms/PhishingRoom';
@@ -23,7 +23,15 @@ import SSHInfoPage from './pages/SSHInfoPage';
 import EncryptedFilePage from './pages/EncryptedFilePage';
 
 const App = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [isAuthenticated, setIsAuthenticated] = React.useState(
+    !!localStorage.getItem('token')
+  );
+
+  React.useEffect(() => {
+    const onAuthChange = () => setIsAuthenticated(!!localStorage.getItem('token'));
+    window.addEventListener('authChanged', onAuthChange);
+    return () => window.removeEventListener('authChanged', onAuthChange);
+  }, []);
 
   return (
     <Router>

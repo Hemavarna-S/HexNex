@@ -17,6 +17,8 @@ const Login = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       localStorage.setItem('name', data.name); 
+      // notify app about auth change so protected routes update immediately
+      window.dispatchEvent(new Event('authChanged'));
       alert(`Welcome back, ${data.name.split(' ')[0]}!`);
       if (data.role === 'student') {
         navigate('/student-dashboard');

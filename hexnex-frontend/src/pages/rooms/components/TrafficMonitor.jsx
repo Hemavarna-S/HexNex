@@ -115,8 +115,12 @@ const TrafficMonitor = ({ packets, animationSpeed = 3 }) => {
             // Delay packets staggered by index to avoid clustering
             const delay = idx * 0.6;
 
-            // Intercepted packets have glow + pulse
-            const glowColor = pkt.intercepted ? 'rgba(255, 0, 0, 0.7)' : 'rgba(0, 255, 0, 0.6)';
+            // Intercepted or tampered packets have distinct glow + pulse
+            const glowColor = pkt.tampered
+              ? 'rgba(255, 140, 0, 0.9)'
+              : pkt.intercepted
+              ? 'rgba(255, 0, 0, 0.7)'
+              : 'rgba(0, 255, 0, 0.6)';
 
             return (
               <Tooltip
@@ -133,7 +137,7 @@ const TrafficMonitor = ({ packets, animationSpeed = 3 }) => {
                       <b>Destination:</b> {pkt.destination}
                     </div>
                     <div>
-                      <b>Content:</b> {pkt.content}
+                      <b>Content:</b> {pkt.displayContent ?? pkt.content}
                     </div>
                     <div>
                       <b>Status:</b>{' '}
@@ -146,14 +150,14 @@ const TrafficMonitor = ({ packets, animationSpeed = 3 }) => {
                 arrow
                 placement="top"
               >
-                <Box
+                    <Box
                   sx={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     width: pkt.size,
                     height: pkt.size,
-                    backgroundColor: pkt.intercepted ? '#ff4c4c' : '#7fff00',
+                    backgroundColor: pkt.tampered ? '#ff9a3c' : pkt.intercepted ? '#ff4c4c' : '#7fff00',
                     borderRadius: '50%',
                     boxShadow: `0 0 8px 2px ${glowColor}`,
                     animationName: paused ? 'none' : 'moveCurve',
@@ -161,9 +165,12 @@ const TrafficMonitor = ({ packets, animationSpeed = 3 }) => {
                     animationIterationCount: 'infinite',
                     animationDuration: `${duration}s`,
                     animationDelay: `${delay}s`,
-                    filter: pkt.intercepted
+                    filter: pkt.tampered
+                      ? 'drop-shadow(0 0 8px #ff8c00) saturate(160%)'
+                      : pkt.intercepted
                       ? 'drop-shadow(0 0 6px #ff0000) saturate(150%)'
                       : 'drop-shadow(0 0 5px #7fff00)',
+                    border: pkt.tampered ? '2px dashed rgba(255,140,0,0.6)' : 'none',
                     cursor: 'pointer',
                   }}
                 />

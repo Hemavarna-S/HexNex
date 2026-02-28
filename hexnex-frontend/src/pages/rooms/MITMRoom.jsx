@@ -36,6 +36,7 @@ const MITMRoom = () => {
   const [flagInput, setFlagInput] = useState('');
   const [roomCompleted, setRoomCompleted] = useState(false);
   const [feedback, setFeedback] = useState({ type: 'info', message: '' });
+  const [certForged, setCertForged] = useState(false);
 
   const interceptedPackets = useMemo(
     () => packets.filter((pkt) => pkt.intercepted).length,
@@ -55,18 +56,54 @@ const MITMRoom = () => {
     const timer = setInterval(() => {
       const source = mockPackets[packetCursor % mockPackets.length];
       const hasCredentialsPayload = Math.random() > 0.72;
-      const intercepted = mitmActive ? Math.random() > 0.35 : false;
 
-      const content = hasCredentialsPayload
+      const baseContent = hasCredentialsPayload
         ? `POST /auth/login user=student_${nextId}&token=tkn_${nextId.toString(16)}ab`
         : source.content;
 
+      // determine interception and readable state
+      let intercepted = mitmActive ? Math.random() > 0.35 : false;
+      let readable = false;
+      let tampered = false;
+      let displayContent = baseContent;
+
+      const protocol = source.protocol || 'HTTP';
+
+      if (protocol === 'HTTPS') {
+        // When HTTPS: interception may place MITM but decryption requires forged cert
+        if (intercepted) {
+          readable = certForged ? Math.random() > 0.2 : false; // even with forge, sometimes can't decrypt
+          if (!readable) {
+            displayContent = '[TLS Encrypted]';
+          } else {
+            // possible tampering once decrypted
+            if (Math.random() > 0.7) {
+              tampered = true;
+              displayContent = baseContent.replace(/tkn_[0-9a-f]+/i, (m) => (m ? `${m}_MOD` : m));
+            }
+          }
+        } else {
+          displayContent = '[TLS Encrypted]';
+        }
+      } else {
+        // Non-TLS traffic is readable by default when intercepted
+        readable = intercepted || !mitmActive;
+        if (intercepted && Math.random() > 0.8) {
+          tampered = true;
+          displayContent = baseContent.replace(/(token=|tkn_)[A-Za-z0-9_]+/i, 'token=MODIFIED');
+        }
+      }
+
       const packet = {
         id: nextId,
+        protocol: protocol,
         source: source.sourceIP,
         destination: source.destinationIP,
-        content,
+        content: baseContent,
+        displayContent,
         intercepted,
+        readable,
+        tampered,
       };
 
       setPackets((prev) => {
@@ -74,11 +111,11 @@ const MITMRoom = () => {
         return updated.slice(-30);
       });
 
-      if (intercepted && hasCredentialsPayload && !capturedSecret) {
+      if (intercepted && readable && hasCredentialsPayload && !capturedSecret) {
         setCapturedSecret(ROOM_FLAG);
         setFeedback({
           type: 'success',
-          message: 'Sensitive login payload intercepted. Flag fragment recovered.',
+          message: 'Sensitive login payload intercepted and decrypted. Flag fragment recovered.',
         });
       }
 
@@ -209,7 +246,7 @@ const MITMRoom = () => {
 
         <TrafficMonitor packets={packets} animationSpeed={2.7} />
         <PacketSniffer packets={packets} />
-        <CertificateForge />
+        <CertificateForge onForgeChange={(val) => setCertForged(val)} />
 
         <Card
           sx={{

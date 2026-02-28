@@ -14,6 +14,7 @@ import MITMRoom from './pages/rooms/MITMRoom';
 import BruteForceRoom from './pages/rooms/BruteForceRoom';
 import SocialEngineeringRoom from './pages/rooms/SocialEngineeringRoom';
 import MalwareRoom from './pages/rooms/MalwareRoom';
+import VulnerableWebAppRoom from './pages/rooms/VulnerableWebAppRoom';
 
 // Fake vault pages (where creds are hidden)
 import VaultLoginPage from './pages/VaultLoginPage';
@@ -68,6 +69,10 @@ const App = () => {
         <Route
           path="/rooms/malware"
           element={isAuthenticated ? <MalwareRoom /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/rooms/vulnerable-webapp"
+          element={isAuthenticated ? <VulnerableWebAppRoom /> : <Navigate to="/login" />}
         />
         <Route
           path="/progress"

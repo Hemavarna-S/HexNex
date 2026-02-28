@@ -7,6 +7,7 @@ import mitmImg from '../assets/mitm.png';
 import bruteImg from '../assets/brute.png';
 import socialImg from '../assets/social.png';
 import malwareImg from '../assets/malware.png';
+import vulnImg from '../assets/phishing.png';
 
 const rooms = [
   {
@@ -38,6 +39,12 @@ const rooms = [
     path: 'malware',
     image: malwareImg,
     description: 'Trigger malware in a secure virtual box and watch detection mechanisms.',
+  },
+  {
+    title: 'Vulnerable Web App',
+    path: 'vulnerable-webapp',
+    image: vulnImg,
+    description: 'Explore common web vulnerabilities: SQLi, XSS, exposed backups, and hidden admin paths.',
   },
 ];
 

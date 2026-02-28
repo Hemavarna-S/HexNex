@@ -159,7 +159,7 @@ const PacketSniffer = ({ packets = [] }) => {
                   {pkt?.destination || 'N/A'}
                 </TableCell>
                 <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
-                  {pkt?.content || 'N/A'}
+                  {pkt?.displayContent ?? pkt?.content ?? 'N/A'}
                 </TableCell>
                 <TableCell align="center">
                   <Chip
@@ -171,10 +171,10 @@ const PacketSniffer = ({ packets = [] }) => {
                 <TableCell align="center">
                   <Tooltip title="Copy packet content">
                     <IconButton
-                      size="small"
-                      onClick={() => copyToClipboard(pkt?.content)}
-                      sx={{ color: 'white' }}
-                    >
+                        size="small"
+                        onClick={() => copyToClipboard(pkt?.displayContent ?? pkt?.content)}
+                        sx={{ color: 'white' }}
+                      >
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>

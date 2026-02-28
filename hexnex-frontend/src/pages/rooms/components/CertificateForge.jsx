@@ -17,7 +17,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { legitCertificate, forgeCertificate } from '../../../utils/mockData';
 
-const CertificateForge = () => {
+const CertificateForge = ({ onForgeChange }) => {
   const [certificate, setCertificate] = useState(legitCertificate);
   const [isForged, setIsForged] = useState(false);
   const [forgeOptions, setForgeOptions] = useState({
@@ -32,12 +32,14 @@ const CertificateForge = () => {
     setCertificate(forgedCert);
     setIsForged(true);
     setCopied(false);
+    if (typeof onForgeChange === 'function') onForgeChange(true);
   };
 
   const handleReset = () => {
     setCertificate(legitCertificate);
     setIsForged(false);
     setCopied(false);
+    if (typeof onForgeChange === 'function') onForgeChange(false);
   };
 
   const copyFingerprint = () => {

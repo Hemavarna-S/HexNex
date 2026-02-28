@@ -16,6 +16,7 @@
     "@mui/material": "^7.1.1",
     "antd": "^5.26.6",
     "axios": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.15.0",
     "openai": "^5.10.2",
     "react": "^19.1.0",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -8,268 +8,315 @@ import {
   Typography,
   TextField,
   Alert,
-  Tabs,
-  Tab,
+  AppBar,
+  Toolbar,
   Paper,
-  Grid,
-  Chip,
-  Stack,
+  Divider,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
-  Divider,
 } from "@mui/material";
+import confetti from "canvas-confetti";
 
 /* ================= FLAGS ================= */
 
 const FLAGS = {
-  WEB: "HEXNEX{SQLI_ADMIN_ACCESS}",
-  JWT: "HEXNEX{JWT_ALG_NONE_BYPASS}",
-  XSS: "HEXNEX{STORED_XSS_TOKEN_THEFT}",
-  ESC1: "HEXNEX{SUID_PRIV_ESC}",
-  ESC2: "HEXNEX{SUDO_GTFOBINS_ESC}",
-  FINAL: "HEXNEX{FULL_SYSTEM_COMPROMISE}",
+  SQLI: "VULNCART{LOGIN_BYPASS_SUCCESS}",
+  XSS: "VULNCART{STORED_XSS_REVIEW}",
+  CMD: "VULNCART{ADMIN_COMMAND_INJECTION}",
 };
+const TOTAL_FLAGS = Object.keys(FLAGS).length;
 
-/* ================= BACKUPS ================= */
+export default function VulnCartCTF() {
+  const [page, setPage] = useState("home");
 
-const BACKUPS = [
-  {
-    name: ".env.bak",
-    content:
-      "DB_USER=root\nDB_PASS=root123\nJWT_SECRET=supersecretkey\nADMIN_PATH=/internal-admin",
-  },
-  {
-    name: "debug.log",
-    content:
-      "WARN: Input not sanitized\nERROR: SQL syntax near ''\nNOTE: sudo misconfigured for less",
-  },
-];
+  const [cmdOutput, setCmdOutput] = useState("");
 
-export default function VulnerableWebAppRoom() {
-  const [tab, setTab] = useState(0);
+  /* ================= AUTH ================= */
 
-  /* ================= ENUMERATION ================= */
-
-  const [robotsOpen, setRobotsOpen] = useState(false);
-  const [sourceOpen, setSourceOpen] = useState(false);
-  const [adminPathFound, setAdminPathFound] = useState(false);
-
-  useEffect(() => {
-    if (robotsOpen && sourceOpen) {
-      setAdminPathFound(true);
-    }
-  }, [robotsOpen, sourceOpen]);
-
-  /* ================= LOGIN (SQLI) ================= */
-
+  const [role, setRole] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginMsg, setLoginMsg] = useState(null);
-  const [role, setRole] = useState(null);
-
-  const generateToken = (r) => {
-    const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }));
-    const payload = btoa(JSON.stringify({ user: r }));
-    return `${header}.${payload}.`;
-  };
+  const [sqliSolved, setSqliSolved] = useState(false);
 
   const handleLogin = () => {
-    if (password.includes("'")) {
-      setLoginMsg({ type: "error", text: "SQL syntax error near ''" });
-      return;
-    }
-
     if (password.toLowerCase().includes("or 1=1")) {
       setRole("admin");
-      localStorage.setItem("token", generateToken("admin"));
-      setLoginMsg({ type: "success", text: "Login successful." });
-      return;
+      setSqliSolved(true);
+      setLoginMsg({ type: "success", text: "Admin login successful!" });
+    } else if (username === "user" && password === "password") {
+      setRole("user");
+      setLoginMsg({ type: "success", text: "Login successful!" });
+    } else {
+      setLoginMsg({ type: "error", text: "Invalid credentials." });
     }
-
-    if (username === "student" && password === "studentpass") {
-      setRole("student");
-      localStorage.setItem("token", generateToken("student"));
-      setLoginMsg({ type: "success", text: "Login successful." });
-      return;
-    }
-
-    setLoginMsg({ type: "error", text: "Invalid credentials." });
-  };
-
-  /* ================= JWT CHECK ================= */
-
-  const getUserFromToken = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.user;
   };
 
   /* ================= XSS ================= */
 
-  const [posts, setPosts] = useState([]);
-  const [xssInput, setXssInput] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [reviewInput, setReviewInput] = useState("");
   const [xssSolved, setXssSolved] = useState(false);
 
-  const handlePost = () => {
-    if (!xssInput.trim()) return;
-    if (xssInput.includes("localStorage")) {
+  const postReview = () => {
+    if (reviewInput.includes("<script")) {
       setXssSolved(true);
     }
-    setPosts([...posts, { id: Date.now(), html: xssInput }]);
-    setXssInput("");
+    setReviews([...reviews, { id: Date.now(), content: reviewInput }]);
+    setReviewInput("");
   };
 
-  /* ================= PRIV ESC ================= */
+  /* ================= COMMAND INJECTION ================= */
 
-  const [esc1, setEsc1] = useState("");
-  const [esc2, setEsc2] = useState("");
-  const [esc1Solved, setEsc1Solved] = useState(false);
-  const [esc2Solved, setEsc2Solved] = useState(false);
+  const [cmdInput, setCmdInput] = useState("");
+  const [cmdSolved, setCmdSolved] = useState(false);
 
-  const submitEsc1 = () => {
-    if (esc1.trim() === "suid-vuln") {
-      setEsc1Solved(true);
+  const runCommand = () => {
+    if (cmdInput.includes(";")) {
+      setCmdSolved(true);
     }
   };
 
-  const submitEsc2 = () => {
-    if (esc2.includes("!/bin/bash")) {
-      setEsc2Solved(true);
-    }
-  };
+  /* ================= FLAG ENGINE ================= */
 
-  /* ================= SCORE SYSTEM ================= */
-
-  const [score, setScore] = useState(0);
-  const [flagInput, setFlagInput] = useState("");
   const [submittedFlags, setSubmittedFlags] = useState([]);
+  const [flagInput, setFlagInput] = useState("");
+  const [flagMsg, setFlagMsg] = useState(null);
+
+  const availableFlags = [
+    sqliSolved && FLAGS.SQLI,
+    xssSolved && FLAGS.XSS,
+    cmdSolved && FLAGS.CMD,
+  ].filter(Boolean);
+
+  const progress = Math.round(
+    (submittedFlags.length / TOTAL_FLAGS) * 100
+  );
 
   const submitFlag = () => {
-    if (Object.values(FLAGS).includes(flagInput) && !submittedFlags.includes(flagInput)) {
-      setScore((s) => s + 100);
-      setSubmittedFlags([...submittedFlags, flagInput]);
+    const flag = flagInput.trim();
+
+    if (!availableFlags.includes(flag)) {
+      setFlagMsg({ type: "error", text: "Incorrect or locked flag." });
+      setFlagInput("");
+      return;
     }
+
+    if (submittedFlags.includes(flag)) {
+      setFlagMsg({ type: "warning", text: "Flag already submitted." });
+      setFlagInput("");
+      return;
+    }
+
+    const updated = [...submittedFlags, flag];
+    setSubmittedFlags(updated);
+    setFlagMsg({ type: "success", text: "Flag accepted!" });
     setFlagInput("");
+
+    // After accepting a flag, navigate back to the corresponding room
+    // Small delay so user sees the success message first
+    setTimeout(() => {
+      if (flag === FLAGS.SQLI) setPage("login");
+      else if (flag === FLAGS.XSS) setPage("products");
+      else if (flag === FLAGS.CMD) setPage("admin");
+    }, 700);
+
+    if (updated.length === TOTAL_FLAGS) {
+      confetti({ particleCount: 300, spread: 140 });
+    }
   };
 
-  /* ================= FINAL ================= */
-
-  const finalUnlocked = score >= 500;
+  /* ================= UI ================= */
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#0b1220", py: 4 }}>
-      <Container maxWidth="lg">
-        <Card sx={{ bgcolor: "#111827", color: "#eaf2ff", mb: 3 }}>
-          <CardContent>
-            <Typography variant="h4">HEXNEX Security Lab</Typography>
-            <Typography sx={{ color: "#9ca3af" }}>
-              Your mission: Compromise the vulnerable training platform and escalate privileges.
-            </Typography>
-          </CardContent>
-        </Card>
+    <Box sx={{ minHeight: "100vh", background: "#0f172a", color: "white" }}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography sx={{ flexGrow: 1 }}>VulnCart</Typography>
+          <Button color="inherit" onClick={() => setPage("home")}>Home</Button>
+          <Button color="inherit" onClick={() => setPage("products")}>Products</Button>
+          <Button color="inherit" onClick={() => setPage("login")}>Login</Button>
+          {role === "admin" && (
+            <Button color="inherit" onClick={() => {
+              setPage("admin");
+            }}>
+              Admin
+            </Button>
+          )}
+          <Button color="inherit" onClick={() => setPage("score")}>Score</Button>
+        </Toolbar>
+      </AppBar>
 
-        <Tabs value={tab} onChange={(e, v) => setTab(v)} textColor="inherit">
-          <Tab label="Briefing" />
-          <Tab label="Login" />
-          <Tab label="XSS" />
-          <Tab label="Backups" />
-          <Tab label="PrivEsc" />
-          <Tab label="Score" />
-        </Tabs>
+      <Container sx={{ py: 4 }}>
 
-        {tab === 0 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Enumeration</Typography>
-            <Button onClick={() => setRobotsOpen(!robotsOpen)}>robots.txt</Button>
-            <Button onClick={() => setSourceOpen(!sourceOpen)}>View Source</Button>
+        {page === "home" && (
+          <Typography>
+            Welcome to VulnCart — Secure Electronics Store.
+          </Typography>
+        )}
 
-            {robotsOpen && <Alert sx={{ mt: 2 }}>Disallow: /internal-admin</Alert>}
-            {sourceOpen && (
-              <Paper sx={{ p: 1, mt: 2, fontFamily: "monospace" }}>
-                {"<!-- TODO remove before prod -->\n<!-- /internal-admin -->"}
-              </Paper>
+        {page === "login" && (
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Login</Typography>
+              <TextField fullWidth sx={{ mt: 2 }} label="Username"
+                value={username} onChange={(e) => setUsername(e.target.value)} />
+              <TextField fullWidth sx={{ mt: 2 }} label="Password"
+                value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Button sx={{ mt: 2 }} variant="contained" onClick={handleLogin}>
+                Login
+              </Button>
+              {loginMsg && (
+                <Alert severity={loginMsg.type} sx={{ mt: 2 }}>
+                  {loginMsg.text}
+                </Alert>
+              )}
+              {sqliSolved && (
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  Flag: {FLAGS.SQLI}
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* PRODUCTS */}
+{page === "products" && (
+  <Box>
+    <Typography variant="h6">Gaming Laptop</Typography>
+    <Divider sx={{ my: 2 }} />
+
+    <TextField
+      fullWidth
+      placeholder="Write a review..."
+      value={reviewInput}
+      onChange={(e) => setReviewInput(e.target.value)}
+    />
+
+    <Button
+      sx={{ mt: 2 }}
+      variant="contained"
+      onClick={() => {
+        if (reviewInput.includes("<script>")) {
+          setXssSolved(true);
+        }
+        setReviews([
+          ...reviews,
+          { id: Date.now(), content: reviewInput },
+        ]);
+        setReviewInput("");
+      }}
+    >
+      POST
+    </Button>
+
+    <List>
+      {reviews.map((r) => (
+        <ListItem key={r.id}>
+          <div
+            dangerouslySetInnerHTML={{ __html: r.content }}
+          />
+        </ListItem>
+      ))}
+    </List>
+
+    {xssSolved && (
+      <Alert severity="success" sx={{ mt: 2 }}>
+        Flag Unlocked: {FLAGS.XSS}
+      </Alert>
+    )}
+  </Box>
+)}
+
+        {/* ADMIN PAGE */}
+{page === "admin" && role === "admin" && (
+  <Paper sx={{ p: 3 }}>
+    <Typography variant="h6">Admin Debug Console</Typography>
+
+    <Typography variant="body2" sx={{ mb: 2 }}>
+      Run system diagnostic commands
+    </Typography>
+
+    <TextField
+      fullWidth
+      placeholder="Enter system command..."
+      value={cmdInput}
+      onChange={(e) => setCmdInput(e.target.value)}
+    />
+
+    <Button
+      sx={{ mt: 2 }}
+      variant="contained"
+      onClick={() => {
+        if (cmdInput.includes(";")) {
+          setCmdSolved(true);
+          setCmdOutput("root\nuid=0(root) gid=0(root)");
+        } else {
+          setCmdOutput("Command executed safely.");
+        }
+      }}
+    >
+      Execute
+    </Button>
+
+    {cmdOutput && (
+      <Paper
+        sx={{
+          mt: 3,
+          p: 2,
+          backgroundColor: "#111",
+          color: "#00ff00",
+          fontFamily: "monospace",
+        }}
+      >
+        {cmdOutput}
+      </Paper>
+    )}
+
+    {/* Admin flag removed - only three challenge flags remain */}
+
+    {cmdSolved && (
+      <Alert severity="success" sx={{ mt: 2 }}>
+        Command Injection Flag: {FLAGS.CMD}
+      </Alert>
+    )}
+  </Paper>
+)}
+
+        {page === "score" && (
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6">Progress</Typography>
+            <Typography sx={{ mt: 1 }}>{progress}% Complete</Typography>
+            <LinearProgress variant="determinate"
+              value={progress}
+              sx={{ mt: 1, height: 10, borderRadius: 5 }} />
+
+            {/* Unlocked flags list removed from Score page per request */}
+
+            <TextField fullWidth sx={{ mt: 3 }}
+              placeholder="Enter flag..."
+              value={flagInput}
+              onChange={(e) => setFlagInput(e.target.value)} />
+            <Button sx={{ mt: 2 }} variant="contained" onClick={submitFlag}>
+              Submit Flag
+            </Button>
+
+            {flagMsg && (
+              <Alert severity={flagMsg.type} sx={{ mt: 2 }}>
+                {flagMsg.text}
+              </Alert>
             )}
-            {adminPathFound && (
+
+            {progress === 100 && (
               <Alert severity="success" sx={{ mt: 2 }}>
-                Admin path discovered!
+                🎉 All flags submitted — well done!
               </Alert>
             )}
           </Paper>
         )}
 
-        {tab === 1 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Login</Typography>
-            <TextField fullWidth label="Username" sx={{ mb: 2 }} value={username} onChange={(e) => setUsername(e.target.value)} />
-            <TextField fullWidth label="Password" sx={{ mb: 2 }} value={password} onChange={(e) => setPassword(e.target.value)} />
-            <Button variant="contained" onClick={handleLogin}>Login</Button>
-            {loginMsg && <Alert severity={loginMsg.type} sx={{ mt: 2 }}>{loginMsg.text}</Alert>}
-            {role === "admin" && <Alert severity="success" sx={{ mt: 2 }}>{FLAGS.WEB}</Alert>}
-          </Paper>
-        )}
-
-        {tab === 2 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Stored XSS</Typography>
-            <TextField fullWidth value={xssInput} onChange={(e) => setXssInput(e.target.value)} placeholder="Post message..." />
-            <Button sx={{ mt: 2 }} onClick={handlePost}>Post</Button>
-            <List>
-              {posts.map((p) => (
-                <ListItem key={p.id}>
-                  <ListItemText primary={<span dangerouslySetInnerHTML={{ __html: p.html }} />} />
-                </ListItem>
-              ))}
-            </List>
-            {xssSolved && <Alert severity="success">{FLAGS.XSS}</Alert>}
-          </Paper>
-        )}
-
-        {tab === 3 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Backup Files</Typography>
-            <List>
-              {BACKUPS.map((b) => (
-                <ListItem key={b.name}>
-                  <ListItemText primary={b.name} secondary={b.content} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        )}
-
-        {tab === 4 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Privilege Escalation</Typography>
-            <Typography>SUID Binary</Typography>
-            <TextField fullWidth value={esc1} onChange={(e) => setEsc1(e.target.value)} />
-            <Button onClick={submitEsc1}>Submit</Button>
-            {esc1Solved && <Alert severity="success">{FLAGS.ESC1}</Alert>}
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography>sudo -l → less</Typography>
-            <TextField fullWidth value={esc2} onChange={(e) => setEsc2(e.target.value)} />
-            <Button onClick={submitEsc2}>Submit</Button>
-            {esc2Solved && <Alert severity="success">{FLAGS.ESC2}</Alert>}
-          </Paper>
-        )}
-
-        {tab === 5 && (
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6">Scoreboard</Typography>
-            <Typography>Score: {score}</Typography>
-            <TextField fullWidth sx={{ mt: 2 }} value={flagInput} onChange={(e) => setFlagInput(e.target.value)} placeholder="Submit flag..." />
-            <Button sx={{ mt: 2 }} onClick={submitFlag}>Submit Flag</Button>
-
-            {finalUnlocked && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                Final Flag: {FLAGS.FINAL}
-              </Alert>
-            )}
-          </Paper>
-        )}
       </Container>
     </Box>
   );

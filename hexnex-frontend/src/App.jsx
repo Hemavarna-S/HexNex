@@ -6,7 +6,7 @@ import Register from './auth/Register';
 import StudentDashboard from './dashboard/StudentDashboard';
 import LandingPage from './pages/LandingPage';
 import Rooms from './pages/Rooms';
-import AIBotChat from './components/AIBotChat';
+// import AIBotChat from './components/AIBotChat';
 
 // Individual simulation rooms
 import PhishingRoom from './pages/rooms/PhishingRoom';

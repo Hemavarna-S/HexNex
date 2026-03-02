@@ -125,6 +125,15 @@ export default function VulnCartCTF() {
 
     if (updated.length === TOTAL_FLAGS) {
       confetti({ particleCount: 300, spread: 140 });
+      (async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const api = (await import('../../utils/api')).default;
+          await api.post('/api/progress/complete-room', { room: 'vulnerable-webapp', points: 50 }, { headers: { Authorization: `Bearer ${token}` } });
+        } catch (e) {
+          console.error('VulnWeb progress error', e);
+        }
+      })();
     }
   };
 

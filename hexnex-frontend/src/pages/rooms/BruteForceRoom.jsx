@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layout, Steps, Card, Input, Button, Typography, message, Spin, Divider } from 'antd';
 import { KeyOutlined, LockOutlined, ApiOutlined, EyeInvisibleOutlined, FileZipOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import Confetti from 'react-confetti';
+import api from '../../utils/api';
 
 const { Header, Content, Footer } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -69,6 +70,16 @@ const BruteForceRoom = () => {
   const handleFlagSubmit = () => {
     if (inputs.flag === 'HEXNEX{Brut3_F0rc3_Atta)k}') {
       message.success('🏁 Correct! You completed the room!');
+      // notify backend about completion
+      (async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await api.post('/api/progress/complete-room', { room: 'brute-force', points: 30 }, { headers: { Authorization: `Bearer ${token}` } });
+        } catch (err) {
+          message.error('Progress update failed (network or auth).');
+          console.error('Progress update error', err);
+        }
+      })();
       setRoomCompleted(true);
     } else {
       message.error('❌ Incorrect flag.');

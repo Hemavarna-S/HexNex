@@ -7,6 +7,7 @@ import StudentDashboard from './dashboard/StudentDashboard';
 import LandingPage from './pages/LandingPage';
 import Rooms from './pages/Rooms';
 import AIBotChat from './components/AIBotChat';
+import ProgressPage from './pages/ProgressPage';
 
 // Individual simulation rooms
 import PhishingRoom from './pages/rooms/PhishingRoom';
@@ -16,12 +17,20 @@ import SocialEngineeringRoom from './pages/rooms/SocialEngineeringRoom';
 import MalwareRoom from './pages/rooms/MalwareRoom';
 import VulnerableWebAppRoom from './pages/rooms/VulnerableWebAppRoom';
 
+// Walkthrough pages
+import WalkthroughIndex from './pages/walkthrough/WalkthroughIndex';
+import WalkthroughRoom from './pages/walkthrough/WalkthroughRoom';
+import WalkthroughTopics from './pages/walkthrough/WalkthroughTopics';
+
 // Fake vault pages (where creds are hidden)
 import VaultLoginPage from './pages/VaultLoginPage';
 import PortalPage from './pages/PortalPage';
 import HiddenAdminPage from './pages/HiddenAdminPage';
 import SSHInfoPage from './pages/SSHInfoPage';
 import EncryptedFilePage from './pages/EncryptedFilePage';
+// Mail + fake pages
+import MailView from './pages/mail/MailView';
+import AmazonLogin from './pages/fake/AmazonLogin';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = React.useState(
@@ -74,9 +83,32 @@ const App = () => {
           path="/rooms/vulnerable-webapp"
           element={isAuthenticated ? <VulnerableWebAppRoom /> : <Navigate to="/login" />}
         />
+        {/* Walkthroughs */}
+        <Route
+          path="/walkthrough"
+          element={isAuthenticated ? <WalkthroughIndex /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/walkthrough/:room"
+          element={isAuthenticated ? <WalkthroughRoom /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/walkthrough/topics"
+          element={isAuthenticated ? <WalkthroughTopics /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/walkthrough/topics/:topic"
+          element={isAuthenticated ? <WalkthroughTopics /> : <Navigate to="/login" />}
+        />
+        {/* Mail and fake pages */}
+        <Route
+          path="/mail/:id"
+          element={isAuthenticated ? <MailView /> : <Navigate to="/login" />}
+        />
+        <Route path="/fake/amazon" element={isAuthenticated ? <AmazonLogin /> : <Navigate to="/login" />} />
         <Route
           path="/progress"
-          element={isAuthenticated ? <div>Progress page</div> : <Navigate to="/login" />}
+          element={isAuthenticated ? <ProgressPage /> : <Navigate to="/login" />}
         />
         <Route
           path="/hexnexai"

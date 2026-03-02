@@ -1,6 +1,8 @@
 import { Grid, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import RoomCard from '../components/RoomCard';
+import React from 'react';
+import api from '../utils/api';
 
 import phishingImg from '../assets/phishing.png';
 import mitmImg from '../assets/mitm.png';
@@ -49,6 +51,24 @@ const rooms = [
 ];
 
 const Rooms = () => {
+  const [hiddenPaths, setHiddenPaths] = React.useState(new Set());
+
+  React.useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await api.get('/api/progress/me', { headers: { Authorization: `Bearer ${token}` } });
+        const completed = res?.data?.progress?.completedRooms || [];
+        const setPaths = new Set(completed.map(c => c.room));
+        setHiddenPaths(setPaths);
+      } catch (err) {
+        // ignore, show all rooms
+      }
+    };
+    fetchProgress();
+  }, []);
+
   return (
     <Box sx={{ p: 5, background: 'linear-gradient(to right, #000428,rgb(0, 0, 64))', minHeight: '100vh' }}>
       <Typography variant="h3" fontWeight="bold" color="#fff" gutterBottom textAlign="center">
@@ -56,7 +76,7 @@ const Rooms = () => {
       </Typography>
 
       <Grid container spacing={4} justifyContent="center" sx={{ mt: 4 }}>
-        {rooms.map((room, index) => (
+        {rooms.filter(r => !hiddenPaths.has(r.path)).map((room, index) => (
           <Grid item key={index}>
             <Link to={`/rooms/${room.path}`} style={{ textDecoration: 'none' }}>
               <RoomCard {...room} />

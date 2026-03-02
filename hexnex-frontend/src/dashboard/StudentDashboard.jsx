@@ -91,6 +91,25 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Card
+            sx={{ backgroundColor: '#6a1b9a', color: '#fff', cursor: 'pointer' }}
+            onClick={() => navigate('/walkthrough')}
+          >
+            <CardContent>
+              <Avatar sx={{ bgcolor: '#fff', color: '#6a1b9a', mb: 2 }}>
+                <SchoolIcon />
+              </Avatar>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Walkthroughs
+              </Typography>
+              <Typography variant="body2">
+                Read guided walkthroughs to learn the concepts behind each room.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
     </Container>
   );

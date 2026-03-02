@@ -176,8 +176,18 @@ const MITMRoom = () => {
     }
 
     if (flagInput.trim() === ROOM_FLAG) {
-      setRoomCompleted(true);
-      setFeedback({ type: 'success', message: 'Flag accepted. MITM room completed.' });
+        setRoomCompleted(true);
+        setFeedback({ type: 'success', message: 'Flag accepted. MITM room completed.' });
+        (async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const api = (await import('../../utils/api')).default;
+            await api.post('/api/progress/complete-room', { room: 'mitm', points: 40 }, { headers: { Authorization: `Bearer ${token}` } });
+          } catch (e) {
+            setFeedback({ type: 'error', message: 'Progress update failed (network or auth).' });
+            console.error('MITM progress error', e);
+          }
+        })();
       return;
     }
 
